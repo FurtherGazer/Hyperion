@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyperion</title>
+
+    <!-- Require the peer dependencies of face-landmarks-detection. -->
+    <script src="https://unpkg.com/@tensorflow/tfjs-core@2.4.0/dist/tf-core.js"></script>
+    <script src="https://unpkg.com/@tensorflow/tfjs-converter@2.4.0/dist/tf-converter.js"></script>
+
+    <!-- You must explicitly require a TF.js backend if you're not using the tfjs union bundle. -->
+    <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@2.4.0/dist/tf-backend-webgl.js"></script>
+    <!-- Alternatively you can use the WASM backend: <script src="https://unpkg.com/@tensorflow/tfjs-backend-wasm@2.4.0/dist/tf-backend-wasm.js"></script> -->
+
+    <!-- Require face-landmarks-detection itself. -->
+    <script src="https://unpkg.com/@tensorflow-models/face-landmarks-detection@0.0.1/dist/face-landmarks-detection.js"></script>
+
+    <!-- CSS -->
+    <style>.canvas-wrapper, #scatter-gl-container {
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        #scatter-gl-container {
+            border: solid 1px black;
+            position: relative;
+        }
+
+        #video {
+            -webkit-transform: scaleX(-1);
+            transform: scaleX(-1);
+            visibility: hidden;
+            width: auto;
+            height: auto;
+            display: none;
+        }</style>
+</head>
+<body>
+    <div id="main">
+        <div class="container">
+          <div class="canvas-wrapper">
+            <canvas id="output" width="600" height="400"></canvas>
+            <video id="video" playsinline="">
+          </video></div>
+          <!-- <div id="scatter-gl-container"></div> -->
+        </div>
+    </div>
+
+    <div>
+        <button onclick="main()">开启</button>
+        <button id="closeBT" onclick="stopMain()" disabled="">停止</button>
+    </div>
+
+    <!-- <img id="source" src="https://mdn.mozillademos.org/files/5397/rhino.jpg"
+    width="300" height="227"> -->
+
+    <script>function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+var NUM_KEYPOINTS = 468;
+var NUM_IRIS_KEYPOINTS = 5;
+var GREEN = '#32EEDB';
+var RED = "#FF2C35";
+var BLUE = "#157AB3";
+var videoWidth = '600';
+var videoHeight = '400';
+window.rafID = null;
+window.animation_status = false;
+canvas = document.getElementById('output'); // 此步骤创建了一个和 video 等大的 canvas
+
+canvas.width = '600';
+canvas.height = '400';
+var canvasContainer = document.querySelector('.canvas-wrapper');
+canvasContainer.style = "width: 600px; height: 400x"; // 设置画板属性
+
+ctx = canvas.getContext('2d'); // .translate 用于为当前网格添加平移变化的方法
+
+ctx.translate(canvas.width, 0); // 相当于从原点平移到了尽头
+
+ctx.scale(-1, 1); // 所以上述其实就是完成了镜像翻转。
+
+ctx.fillStyle = GREEN;
+ctx.strokeStyle = GREEN;
+ctx.lineWidth = 0.5; // 通过 async 我们将 setupCamera() 变成了一个异步函数
+
+function setupCamera() {
+  return _setupCamera.apply(this, arguments);
+}
+
+function _setupCamera() {
+  _setupCamera = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    var constraints, video, stopBt, MediaStream;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            constraints = {
+              video: {
+                width: 600,
+                height: 400,
+                facingMode: "user"
+              },
+              audio: false
+            }; // 获得video摄像头区域
+
+            video = document.getElementById("video"); // 使关闭摄像头变得可可执行
+
+            stopBt = document.getElementById("closeBT");
+            if (stopBt) stopBt.disabled = false;
+            _context.next = 6;
+            return navigator.mediaDevices.getUserMedia(constraints);
+
+          case 6:
+            MediaStream = _context.sent;
+            video.srcObject = MediaStream;
+            video.play();
+            console.log(MediaStream); // 对象
+
+            window.CurMediaStream = MediaStream;
+            return _context.abrupt("return", new Promise(function (resolve) {
+              // 返回一个箭头函数
+              video.onloadedmetadata = function () {
+                // 箭头函数在 video.onloadedmetadata 上绑定了一个箭头事件
+                resolve(video);
+              };
+            }));
+
+          case 12:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+  return _setupCamera.apply(this, arguments);
+}
+
+; // stop only camera
+
+function stopVideoOnly(stream) {
+  stream.getTracks().forEach(function (track) {
+    if (track.readyState == 'live' && track.kind === 'video') {
+      track.stop();
+    }
+  });
+}
+
+;
+
+function stopMain() {
+  if (window.CurMediaStream) {
+    stopVideoOnly(window.CurMediaStream);
+  } else {
+    console.log('没有正在运行的 MediaStream');
+  }
+
+  window.animation_status = false;
+  window.cancelAnimationFrame(window.rafID);
+}
+
+;</script>
+
+    <script src="/Hyperion.e31bb0bc.js"></script>
+</body>
+</html>

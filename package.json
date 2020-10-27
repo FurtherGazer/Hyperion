@@ -1,0 +1,19 @@
+{
+  "devDependencies": {
+    "cssnano": "^4.1.10"
+  },
+  "name": "Hyperion",
+  "version": "1.0.0",
+  "main": "index.html",
+  "repository": "git@github.com:FurtherGazer/Hyperion.git",
+  "author": "bjzws1994 <1460639872@qq.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@tensorflow-models/face-landmarks-detection": "^0.0.2",
+    "@tensorflow-models/facemesh": "^0.0.5",
+    "@tensorflow/tfjs-backend-wasm": "^2.7.0",
+    "@tensorflow/tfjs-converter": "^2.7.0",
+    "@tensorflow/tfjs-core": "^2.7.0",
+    "regenerator-runtime": "^0.13.7"
+  }
+}
