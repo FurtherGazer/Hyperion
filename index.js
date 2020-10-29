@@ -5,6 +5,85 @@ import * as faceLandmarksDetection from '@tensorflow-models/face-landmarks-detec
 
 tf.setBackend('wasm').then(() => main());
 
+const NUM_KEYPOINTS = 468;
+const NUM_IRIS_KEYPOINTS = 5;
+const GREEN = '#32EEDB';
+const RED = "#FF2C35";
+const BLUE = "#157AB3";
+const videoWidth = '600';
+const videoHeight = '400';
+window.rafID = null;
+window.animation_status = false;
+
+var canvas = document.getElementById('output');
+// 此步骤创建了一个和 video 等大的 canvas
+canvas.width = '600';
+canvas.height = '400';
+const canvasContainer = document.querySelector('.canvas-wrapper');
+canvasContainer.style = `width: 600px; height: 400x`;
+// 设置画板属性
+var ctx = canvas.getContext('2d');
+// 镜像翻转
+ctx.translate(canvas.width, 0); 
+ctx.scale(-1, 1);
+ctx.fillStyle = GREEN;
+ctx.strokeStyle = GREEN;
+ctx.lineWidth = 2;
+// 设置图层叠加方案
+ctx.globalCompositeOperation="difference";
+
+// 其他可选方案: difference 更加柔和
+// 具体可参考: https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+async function setupCamera() {
+    let constraints = {
+        video: {
+            width: 600,
+            height: 400,
+            facingMode: "user"
+        },
+        audio:false
+    };
+    // 获得video摄像头区域
+    let video = document.getElementById("video");
+    // 使关闭摄像头变得可可执行
+    let stopBt = document.getElementById("closeBT");
+    if (stopBt)stopBt.disabled = false;
+    
+    const MediaStream = await navigator.mediaDevices.getUserMedia(constraints)
+    video.srcObject = MediaStream;
+    video.play();
+    console.log('Set MediaStream!'); // 对象
+    window.CurMediaStream = MediaStream;
+
+    return new Promise( 
+        (resolve) => {
+            video.onloadedmetadata = () => {
+                resolve(video); 
+            };
+        }
+    );
+};
+window.setupCamera = setupCamera;
+
+// stop only camera
+function stopVideoOnly(stream) {
+    stream.getTracks().forEach(function(track) {
+        if (track.readyState == 'live' && track.kind === 'video') {
+            track.stop();
+        }
+    });
+};
+function stopMain(){
+    if (window.CurMediaStream){
+        stopVideoOnly(window.CurMediaStream)
+    }else{
+        console.log('没有正在运行的 MediaStream')
+    }
+    window.animation_status = false;
+    window.cancelAnimationFrame(window.rafID);     
+};
+window.stopMain = stopMain;
+
 // 清空 canvas 
 function clearCanvas() {   
     var c = document.getElementById("output")
